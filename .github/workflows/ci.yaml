@@ -27,14 +27,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: configure aws credentials
-        if: ${{ inputs.provider == "aws" }}
+        if: ${{ inputs.provider == 'aws' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: "Az CLI login"
-        if: ${{ inputs.provider == "azure" }}
+        if: ${{ inputs.provider == 'azure' }}
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
