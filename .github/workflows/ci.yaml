@@ -17,6 +17,7 @@ permissions:
 jobs:
   job1:
     name: "job1"
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     defaults:
       run:
