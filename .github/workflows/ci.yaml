@@ -60,7 +60,8 @@ jobs:
       
       - name: Terraform Plan
         id: plan
-        run: terraform plan -var-file="variables/prod/terraform.tfvars" -no-color -input=false
+        run: |
+          terraform plan -var-file="variables/des/terraform.tfvars" -no-color -input=false
         
       - name: Terraform Apply
         if: ${{ env.TERRAFORM_DESTROY == 'false'}}
