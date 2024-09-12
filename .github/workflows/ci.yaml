@@ -1,0 +1,65 @@
+name: "CI Infra Terraform"
+
+on:
+  workflow_call:
+    inputs:
+      provider:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string        
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  job1:
+    name: "job1"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: infra
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6          
+        
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -recursive -check
+      
+      - name: Terraform Init
+        id: init
+        run: terraform init
+      
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+      
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -var-file="variables/prod/terraform.tfvars" -no-color -input=false
+        
+      - name: Terraform Apply
+        if: ${{ env.TERRAFORM_DESTROY == 'false'}}
+        id: apply
+        run: |
+          terraform apply -var-file="variables/prod/terraform.tfvars" -auto-approve -input=false
+
+      - name: Terraform Destroy
+        if: ${{ env.TERRAFORM_DESTROY == 'true' }}
+        id: destroy
+        run: |
+          terraform destroy -var-file="variables/prod/terraform.tfvars" -no-color -auto-approve -input=false
