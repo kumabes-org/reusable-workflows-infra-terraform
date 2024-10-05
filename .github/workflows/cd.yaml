@@ -1,4 +1,4 @@
-name: "CI Infra Terraform"
+name: "CD Infra Terraform"
 
 on:
   workflow_call:
@@ -9,6 +9,10 @@ on:
       environment:
         required: true
         type: string        
+      destroy-infra:
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   id-token: write   # This is required for requesting the JWT
@@ -50,7 +54,7 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.5.5
+          terraform_version: 1.6.6          
         
       - name: Terraform fmt
         id: fmt
@@ -68,3 +72,15 @@ jobs:
         id: plan
         run: |
           terraform plan -var-file="variables/${{ inputs.environment }}/terraform.tfvars" -no-color -input=false
+        
+      - name: Terraform Apply
+        if: ${{ !inputs.destroy-infra }}
+        id: apply
+        run: |
+          terraform apply -var-file="variables/${{ inputs.environment }}/terraform.tfvars" -auto-approve -input=false
+
+      - name: Terraform Destroy
+        if: ${{ inputs.destroy-infra }}
+        id: destroy
+        run: |
+          terraform destroy -var-file="variables/${{ inputs.environment }}/terraform.tfvars" -no-color -auto-approve -input=false
