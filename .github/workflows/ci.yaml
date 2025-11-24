@@ -30,7 +30,7 @@ jobs:
         working-directory: infra
     steps:
       - name: Git clone the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: configure aws credentials
         if: ${{ inputs.provider == 'aws' }}
